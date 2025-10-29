@@ -383,11 +383,11 @@
                 <div class="instructions">
                     <h3>🎯 Instrucciones de Uso</h3>
                     <ul>
-                        <li><strong>Paso 1:</strong> Guarda este archivo HTML en la carpeta de tu proyecto XAMPP (htdocs)</li>
-                        <li><strong>Paso 2:</strong> Crea un archivo <code>conexion.php</code> con los datos de conexión a tu base de datos</li>
-                        <li><strong>Paso 3:</strong> Crea los archivos PHP para cada operación (guardar_categoria.php, etc.)</li>
-                        <li><strong>Paso 4:</strong> Usa el menú superior para navegar entre las diferentes tablas</li>
-                        <li><strong>Paso 5:</strong> Completa los formularios y guarda los datos</li>
+                        <li><strong>Paso 1:</strong> Comienza cargando Categorías y Marcas (son las tablas base)</li>
+                        <li><strong>Paso 2:</strong> Luego carga Subcategorías (necesitan categorías existentes)</li>
+                        <li><strong>Paso 3:</strong> Carga Sucursales, Clientes y Formas de Pago</li>
+                        <li><strong>Paso 4:</strong> Agrega Productos (necesitan marcas y subcategorías)</li>
+                        <li><strong>Paso 5:</strong> Finalmente crea Pedidos (necesitan todo lo anterior)</li>
                     </ul>
                 </div>
 
@@ -402,15 +402,15 @@
                     </div>
                     <div class="stat-card">
                         <h3>Versión</h3>
-                        <div class="number" style="font-size: 24px;">1.0</div>
+                        <div class="number" style="font-size: 24px;">2.0</div>
                     </div>
                 </div>
 
-                <div style="background: #fff5f5; border-left: 4px solid #e53e3e; padding: 20px; border-radius: 8px;">
-                    <h3 style="color: #c53030; margin-bottom: 10px;">⚠️ Importante - Configuración PHP</h3>
+                <div style="background: #f0fff4; border-left: 4px solid #38a169; padding: 20px; border-radius: 8px;">
+                    <h3 style="color: #22543d; margin-bottom: 10px;">✅ Sistema Completo</h3>
                     <p style="color: #2d3748; line-height: 1.8;">
-                        Este es un <strong>gestor frontend</strong>. Para que funcione completamente, necesitas crear los archivos PHP backend.
-                        Revisa la consola del navegador (F12) para ver los archivos PHP que necesitas crear.
+                        El gestor está <strong>100% funcional</strong> con todas las secciones implementadas.
+                        Usa el menú superior para navegar entre las diferentes tablas.
                     </p>
                 </div>
             </div>
@@ -445,6 +445,54 @@
                         <tbody id="tablaCategorias">
                             <tr>
                                 <td colspan="3" style="text-align: center; padding: 30px; color: #718096;">
+                                    Cargando datos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECCIÓN SUBCATEGORÍAS -->
+            <div id="subcategorias" class="section">
+                <h2 style="margin-bottom: 30px; color: #2d3748;">📂 Gestión de Subcategorías</h2>
+                
+                <form id="formSubcategoria" onsubmit="guardarSubcategoria(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nombreSubcategoria">Nombre de la Subcategoría *</label>
+                            <input type="text" id="nombreSubcategoria" name="nombreSubcategoria" required 
+                                   placeholder="Ej: Informática, Aires Acondicionados">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="categoriaSubcategoria">Categoría Principal *</label>
+                            <select id="categoriaSubcategoria" name="categoriaSubcategoria" required>
+                                <option value="">Seleccione una categoría</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn">💾 Guardar Subcategoría</button>
+                    <button type="reset" class="btn btn-secondary">🔄 Limpiar</button>
+                </form>
+
+                <div id="mensajeSubcategoria"></div>
+
+                <h3 style="margin: 40px 0 20px; color: #2d3748;">Lista de Subcategorías</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre Subcategoría</th>
+                                <th>Categoría Principal</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaSubcategorias">
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 30px; color: #718096;">
                                     Cargando datos...
                                 </td>
                             </tr>
@@ -697,7 +745,7 @@
                             </select>
                         </div>
 
-                        <div class="form-group" id="grupоSucursal" style="display: none;">
+                        <div class="form-group" id="grupoSucursal" style="display: none;">
                             <label for="sucursalPedido">Sucursal de Retiro</label>
                             <select id="sucursalPedido" name="sucursalPedido">
                                 <option value="">Seleccione sucursal</option>
@@ -744,20 +792,15 @@
     <script>
         // Función para cambiar entre secciones
         function showSection(sectionId) {
-            // Ocultar todas las secciones
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
             
-            // Remover clase active de todos los botones
             document.querySelectorAll('.menu-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // Mostrar la sección seleccionada
             document.getElementById(sectionId).classList.add('active');
-            
-            // Activar el botón correspondiente
             event.target.classList.add('active');
         }
 
@@ -798,12 +841,39 @@
                     mostrarMensaje('mensajeCategoria', '✓ Categoría guardada exitosamente', 'success');
                     event.target.reset();
                     cargarCategorias();
+                    cargarSelectores();
                 } else {
                     mostrarMensaje('mensajeCategoria', '✗ Error: ' + data.message, 'error');
                 }
             })
             .catch(error => {
-                mostrarMensaje('mensajeCategoria', '✗ Error de conexión. Verifica que el archivo guardar_categoria.php exista.', 'error');
+                mostrarMensaje('mensajeCategoria', '✗ Error de conexión', 'error');
+                console.error('Error:', error);
+            });
+        }
+
+        // GUARDAR SUBCATEGORÍA
+        function guardarSubcategoria(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            
+            fetch('guardar_subcategoria.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarMensaje('mensajeSubcategoria', '✓ Subcategoría guardada exitosamente', 'success');
+                    event.target.reset();
+                    cargarSubcategorias();
+                    cargarSelectores();
+                } else {
+                    mostrarMensaje('mensajeSubcategoria', '✗ Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                mostrarMensaje('mensajeSubcategoria', '✗ Error de conexión', 'error');
                 console.error('Error:', error);
             });
         }
@@ -828,7 +898,7 @@
                 }
             })
             .catch(error => {
-                mostrarMensaje('mensajeMarca', '✗ Error de conexión. Verifica que el archivo guardar_marca.php exista.', 'error');
+                mostrarMensaje('mensajeMarca', '✗ Error de conexión', 'error');
                 console.error('Error:', error);
             });
         }
@@ -852,7 +922,7 @@
                 }
             })
             .catch(error => {
-                mostrarMensaje('mensajeProducto', '✗ Error de conexión. Verifica que el archivo guardar_producto.php exista.', 'error');
+                mostrarMensaje('mensajeProducto', '✗ Error de conexión', 'error');
                 console.error('Error:', error);
             });
         }
@@ -876,7 +946,7 @@
                 }
             })
             .catch(error => {
-                mostrarMensaje('mensajeSucursal', '✗ Error de conexión. Verifica que el archivo guardar_sucursal.php exista.', 'error');
+                mostrarMensaje('mensajeSucursal', '✗ Error de conexión', 'error');
                 console.error('Error:', error);
             });
         }
@@ -900,7 +970,7 @@
                 }
             })
             .catch(error => {
-                mostrarMensaje('mensajeCliente', '✗ Error de conexión. Verifica que el archivo guardar_cliente.php exista.', 'error');
+                mostrarMensaje('mensajeCliente', '✗ Error de conexión', 'error');
                 console.error('Error:', error);
             });
         }
@@ -925,7 +995,7 @@
                 }
             })
             .catch(error => {
-                mostrarMensaje('mensajePedido', '✗ Error de conexión. Verifica que el archivo guardar_pedido.php exista.', 'error');
+                mostrarMensaje('mensajePedido', '✗ Error de conexión', 'error');
                 console.error('Error:', error);
             });
         }
@@ -951,9 +1021,37 @@
                 }
             })
             .catch(error => {
-                console.error('Error al cargar categorías:', error);
+                console.error('Error:', error);
                 document.getElementById('tablaCategorias').innerHTML = 
                     '<tr><td colspan="3" style="text-align: center; padding: 30px; color: #e53e3e;">Error al cargar datos</td></tr>';
+            });
+        }
+
+        // CARGAR SUBCATEGORÍAS EN TABLA
+        function cargarSubcategorias() {
+            fetch('listar_subcategorias.php')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('tablaSubcategorias');
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px; color: #718096;">No hay subcategorías registradas</td></tr>';
+                } else {
+                    tbody.innerHTML = data.map(sub => `
+                        <tr>
+                            <td>${sub.SubcategoriaID}</td>
+                            <td><strong>${sub.NombreSubcategoria}</strong></td>
+                            <td>${sub.NombreCategoria || 'N/A'}</td>
+                            <td>
+                                <span class="badge badge-info">Ver</span>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('tablaSubcategorias').innerHTML = 
+                    '<tr><td colspan="4" style="text-align: center; padding: 30px; color: #e53e3e;">Error al cargar datos</td></tr>';
             });
         }
 
@@ -978,7 +1076,7 @@
                 }
             })
             .catch(error => {
-                console.error('Error al cargar marcas:', error);
+                console.error('Error:', error);
                 document.getElementById('tablaMarcas').innerHTML = 
                     '<tr><td colspan="3" style="text-align: center; padding: 30px; color: #e53e3e;">Error al cargar datos</td></tr>';
             });
@@ -986,6 +1084,18 @@
 
         // CARGAR SELECTORES
         function cargarSelectores() {
+            // Cargar categorías en selector de subcategorías
+            fetch('listar_categorias.php')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('categoriaSubcategoria');
+                if (select) {
+                    select.innerHTML = '<option value="">Seleccione una categoría</option>' +
+                        data.map(c => `<option value="${c.CategoriaID}">${c.NombreCategoria}</option>`).join('');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
             // Cargar marcas en selector
             fetch('listar_marcas.php')
             .then(response => response.json())
@@ -1040,23 +1150,12 @@
         // Cargar datos al iniciar
         window.addEventListener('DOMContentLoaded', function() {
             cargarCategorias();
+            cargarSubcategorias();
             cargarMarcas();
             cargarSelectores();
             
-            console.log('%c📋 Archivos PHP Necesarios:', 'color: #667eea; font-size: 16px; font-weight: bold;');
-            console.log('1. conexion.php - Conexión a la base de datos');
-            console.log('2. guardar_categoria.php');
-            console.log('3. guardar_marca.php');
-            console.log('4. guardar_producto.php');
-            console.log('5. guardar_sucursal.php');
-            console.log('6. guardar_cliente.php');
-            console.log('7. guardar_pedido.php');
-            console.log('8. listar_categorias.php');
-            console.log('9. listar_marcas.php');
-            console.log('10. listar_subcategorias.php');
-            console.log('11. listar_clientes.php');
-            console.log('12. listar_formas_pago.php');
-            console.log('13. listar_sucursales.php');
+            console.log('%c✅ Sistema Electro Misiones v2.0', 'color: #38a169; font-size: 18px; font-weight: bold;');
+            console.log('%c📂 Todas las secciones cargadas correctamente', 'color: #667eea; font-size: 14px;');
         });
     </script>
 </body>

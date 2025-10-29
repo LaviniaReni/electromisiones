@@ -1,12 +1,11 @@
 <?php
-// ============================================
-// ARCHIVO: listar_subcategorias.php
-// Listar todas las subcategorías
-// ============================================
 header('Content-Type: application/json');
 include 'conexion.php';
 
-$sql = "SELECT * FROM Subcategorias ORDER BY NombreSubcategoria";
+$sql = "SELECT s.*, c.NombreCategoria 
+        FROM Subcategorias s
+        INNER JOIN Categorias c ON s.CategoriaID = c.CategoriaID
+        ORDER BY s.NombreSubcategoria";
 $resultado = $conexion->query($sql);
 
 $subcategorias = [];
